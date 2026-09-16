@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seed Tools</title>
+
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --panel: #111;
+      --panel-hover: #161616;
+      --input: #0d0d0d;
+      --text: #e5e5e5;
+      --muted: #858585;
+      --accent: #00ff00;
+      --border: #292929;
+      --bar: #00ff00;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      width: min(1280px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 34px 0;
+    }
+
+    header {
+      width: min(620px, 100%);
+      border: 2px solid var(--border);
+      border-left: 2px solid var(--accent);
+      background: var(--panel);
+      padding: 18px 20px;
+      margin-bottom: 18px;
+    }
+
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: -1px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      box-shadow: 0 0 8px rgba(0, 255, 0, .5);
+      flex: 0 0 auto;
+    }
+
+    .intro {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    details {
+      border: 2px solid var(--border);
+      background: var(--panel);
+      margin-bottom: 14px;
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 11px 14px;
+      font-size: 14px;
+      font-weight: bold;
+      user-select: none;
+      list-style-position: inside;
+    }
+
+    summary::marker {
+      color: var(--accent);
+    }
+
+    details[open] summary {
+      border-bottom: 2px solid var(--border);
+    }
+
+    .section {
+      padding: 14px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 200px;
+      display: block;
+
+      background: var(--input);
+      color: var(--text);
+
+      border: 2px solid var(--border);
+      padding: 10px;
+
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+      line-height: 1.4;
+
+      resize: vertical;
+      outline: none;
+    }
+
+    textarea:focus,
+    select:focus {
+      border-color: #444;
+    }
+
+    textarea.output {
+      min-height: 200px;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    label {
+      color: var(--text);
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    input[type="checkbox"] {
+      accent-color: var(--accent);
+    }
+
+    select {
+      padding: 7px 9px;
+      background: var(--input);
+      color: var(--text);
+      border: 2px solid var(--border);
+      outline: none;
+    }
+
+    button {
+      padding: 9px 15px;
+      background: #121212;
+      color: var(--text);
+      border: 2px solid var(--border);
+      cursor: pointer;
+      font-weight: bold;
+      transition: .15s ease;
+    }
+
+    button:hover {
+      border-color: var(--accent);
+      background: var(--panel-hover);
+    }
+
+    .summary {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border: 2px solid var(--border);
+      background: #0e0e0e;
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    .small-muted {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* -------------------------------------------------- */
+    /* PROCESSOR                                          */
+    /* -------------------------------------------------- */
+
+    .processor-grid {
+      display: grid;
+      grid-template-columns:
+        minmax(180px, 1fr)
+        minmax(260px, 1.4fr)
+        minmax(400px, 3fr);
+
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .box {
+      min-width: 0;
+      min-height: 400px;
+
+      border: 2px solid var(--border);
+      background: #0e0e0e;
+      padding: 13px;
+
+      overflow: hidden;
+    }
+
+    .box h3 {
+      margin: 0 0 12px;
+      font-size: 15px;
+    }
+
+    .seed-list,
+    .sorted-list {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 12px;
+      line-height: 1.55;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      font-size: 12px;
+    }
+
+    .copy {
+      cursor: pointer;
+      color: var(--text);
+      background: #151515;
+      padding: 3px 6px;
+      border: 1px solid var(--border);
+      font-family: Consolas, "Courier New", monospace;
+      overflow-wrap: anywhere;
+    }
+
+    .copy:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .map-link {
+      color: var(--accent);
+    }
+
+    .map-link:hover {
+      text-decoration: underline;
+    }
+
+    /* -------------------------------------------------- */
+    /* CHARTS                                              */
+    /* -------------------------------------------------- */
+
+    .chart {
+      margin-bottom: 14px;
+      padding: 10px;
+      border: 2px solid var(--border);
+      background: #0b0b0b;
+    }
+
+    .chart-title {
+      margin-bottom: 7px;
+      font-weight: bold;
+      font-size: 13px;
+    }
+
+    .chart-note {
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .chart-row {
+      display: grid;
+      grid-template-columns: 155px minmax(80px, 1fr) 45px;
+      gap: 8px;
+      align-items: center;
+      margin: 6px 0;
+    }
+
+    .chart-label {
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .chart-bar-wrap {
+      width: 100%;
+      height: 16px;
+      background: #080808;
+      border: 1px solid var(--border);
+    }
+
+    .chart-bar {
+      height: 100%;
+      background: var(--bar);
+      opacity: .7;
+    }
+
+    .chart-count {
+      text-align: right;
+      font-size: 11px;
+      color: var(--text);
+    }
+
+    .dist-canvas-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    #distCanvas {
+      width: 100%;
+      height: 330px;
+      display: block;
+      background: #090909;
+      border: 1px solid var(--border);
+    }
+
+    /* -------------------------------------------------- */
+    /* EXTRACTOR / DEDUPER                                */
+    /* -------------------------------------------------- */
+
+    .tool-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .tool-panel {
+      min-width: 0;
+    }
+
+    .tool-panel h3 {
+      margin: 0 0 8px;
+      font-size: 14px;
+    }
+
+    /* -------------------------------------------------- */
+    /* MAP                                                 */
+    /* -------------------------------------------------- */
+
+    .map-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .map-wrapper {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+
+      max-width: 900px;
+      margin: 0 auto;
+
+      background: #070707;
+      border: 2px solid var(--border);
+
+      position: relative;
+      overflow: hidden;
+    }
+
+    .map-grid {
+      position: absolute;
+      inset: 0;
+
+      background-image:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+
+      background-size: 10% 10%;
+    }
+
+    .map-axis-x,
+    .map-axis-z {
+      position: absolute;
+      background: rgba(0,255,0,.18);
+      pointer-events: none;
+    }
+
+    .map-axis-x {
+      width: 100%;
+      height: 1px;
+      top: 50%;
+      left: 0;
+    }
+
+    .map-axis-z {
+      width: 1px;
+      height: 100%;
+      left: 50%;
+      top: 0;
+    }
+
+    .point {
+      position: absolute;
+
+      width: 7px;
+      height: 7px;
+
+      border-radius: 50%;
+
+      transform: translate(-50%, -50%);
+
+      cursor: pointer;
+
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,.8),
+        0 0 5px rgba(0,255,0,.25);
+
+      transition:
+        transform .1s ease,
+        box-shadow .1s ease;
+    }
+
+    .point:hover {
+      transform: translate(-50%, -50%) scale(1.7);
+      box-shadow:
+        0 0 0 1px #000,
+        0 0 9px rgba(0,255,0,.8);
+      z-index: 10;
+    }
+
+    .map-info {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+
+      margin-top: 9px;
+
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    @media (max-width: 1000px) {
+      .processor-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .processor-grid .box:last-child {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .page {
+        width: calc(100% - 20px);
+        padding-top: 20px;
+      }
+
+      .processor-grid,
+      .tool-columns {
+        grid-template-columns: 1fr;
+      }
+
+      .processor-grid .box:last-child {
+        grid-column: auto;
+      }
+
+      .chart-row {
+        grid-template-columns: 110px minmax(50px, 1fr) 40px;
+      }
+
+      #distCanvas {
+        height: 280px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<main class="page">
+
+  <header>
+    <div class="top">
+      <h1>Seed Tools</h1>
+      <div class="dot"></div>
+    </div>
+
+    <p class="intro">
+      Seed processing, extraction, deduplication and mapping tools.
+    </p>
+  </header>
+
+
+  <!-- ================================================== -->
+  <!-- SEED PROCESSOR                                    -->
+  <!-- ================================================== -->
+
+  <details open>
+    <summary>Seed Processor</summary>
+
+    <div class="section">
+
+      <textarea
+        id="processorInput"
+        placeholder="Paste seed data here...&#10;&#10;seed x z score"
+      ></textarea>
+
+      <div class="controls">
+
+        <label>
+          <input type="checkbox" id="lb">
+          Large Biomes
+        </label>
+
+        <label>
+          <input type="checkbox" id="inBounds">
+          In bounds
+        </label>
+
+        <label>
+          Sort by:
+          <select id="sortMode">
+            <option value="score">Score (desc)</option>
+            <option value="distance">Distance from 0,0 (asc)</option>
+          </select>
+        </label>
+
+        <button onclick="processSeeds()">Process</button>
+
+      </div>
+
+      <div id="summary" class="summary">
+        <span class="small-muted">
+          No data processed yet.
+        </span>
+      </div>
+
+      <div class="processor-grid">
+
+        <div class="box">
+          <h3>Seeds</h3>
+          <div id="seeds" class="seed-list"></div>
+        </div>
+
+        <div class="box">
+          <h3>Sorted and deduped</h3>
+          <div id="sorted" class="sorted-list"></div>
+        </div>
+
+        <div class="box">
+
+          <h3>Surface</h3>
+
+          <div id="distChart" class="chart"></div>
+
+          <div id="chart" class="chart"></div>
+
+          <div id="links"></div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </details>
+
+
+  <!-- ================================================== -->
+  <!-- SEED EXTRACTOR                                    -->
+  <!-- ================================================== -->
+
+  <details>
+    <summary>Seed Extractor</summary>
+
+    <div class="section">
+
+      <div class="tool-columns">
+
+        <div class="tool-panel">
+          <h3>Input log</h3>
+
+          <textarea
+            id="extractInput"
+            placeholder="Paste log here..."
+          ></textarea>
+        </div>
+
+        <div class="tool-panel">
+          <h3>Extracted seeds</h3>
+
+          <textarea
+            id="extractOutput"
+            class="output"
+            readonly
+          ></textarea>
+        </div>
+
+      </div>
+
+      <div class="controls">
+
+        <button onclick="extractSeeds()">
+          Extract
+        </button>
+
+        <button onclick="copyExtracted()">
+          Copy result
+        </button>
+
+      </div>
+
+    </div>
+  </details>
+
+
+  <!-- ================================================== -->
+  <!-- DEDUPER                                            -->
+  <!-- ================================================== -->
+
+  <details>
+    <summary>Deduper</summary>
+
+    <div class="section">
+
+      <div class="tool-columns">
+
+        <div class="tool-panel">
+          <h3>Input</h3>
+
+          <textarea
+            id="dedupeInput"
+            placeholder="seed x z size"
+          ></textarea>
+        </div>
+
+        <div class="tool-panel">
+          <h3>Output</h3>
+
+          <textarea
+            id="dedupeOutput"
+            class="output"
+            readonly
+          ></textarea>
+        </div>
+
+      </div>
+
+      <div class="controls">
+
+        <button onclick="dedupeSeeds()">
+          Deduplicate
+        </button>
+
+        <button onclick="copyDedupe()">
+          Copy result
+        </button>
+
+      </div>
+
+      <div id="dedupeSummary" class="summary">
+        <span class="small-muted">
+          Duplicate entries are expected to be adjacent.
+        </span>
+      </div>
+
+    </div>
+  </details>
+
+
+  <!-- ================================================== -->
+  <!-- MAP                                                 -->
+  <!-- ================================================== -->
+
+  <details>
+    <summary>Seed Map</summary>
+
+    <div class="section">
+
+      <textarea
+        id="mapInput"
+        placeholder="seed x z size"
+      ></textarea>
+
+      <div class="map-controls">
+
+        <label>
+          <input
+            type="checkbox"
+            id="mapLargeBiomes"
+            onchange="drawMap()"
+          >
+          Large Biomes
+        </label>
+
+        <button onclick="drawMap()">
+          Draw
+        </button>
+
+      </div>
+
+      <div class="map-wrapper" id="mapWrapper">
+
+        <div class="map-grid" id="mapGrid"></div>
+
+        <div class="map-axis-x"></div>
+        <div class="map-axis-z"></div>
+
+      </div>
+
+      <div class="map-info">
+        <span id="mapSizeInfo">
+          Map: 173 539 328 × 173 539 328
+        </span>
+
+        <span id="mapPointInfo">
+          No points.
+        </span>
+      </div>
+
+    </div>
+  </details>
+
+
+  <footer>
+    ZAJONC6118 · github.io
+  </footer>
+
+</main>
+
+
+<script>
+/* ===================================================== */
+/* COMMON                                                */
+/* ===================================================== */
+
+function copyText(text) {
+  navigator.clipboard.writeText(text);
+}
+
+function fmt(n) {
+  return Number(n).toLocaleString("en-US");
+}
+
+function dist(x, z) {
+  return Math.sqrt(x * x + z * z);
+}
+
+
+/* ===================================================== */
+/* SEED PROCESSOR                                        */
+/* ===================================================== */
+
+function processSeeds() {
+  const input =
+    document.getElementById("processorInput").value.trim();
+
+  const raw = input ? input.split(/\r?\n/) : [];
+
+  const lb =
+    document.getElementById("lb").checked;
+
+  const inBounds =
+    document.getElementById("inBounds").checked;
+
+  const sortMode =
+    document.getElementById("sortMode").value;
+
+  const rows = [];
+
+  for (const line of raw) {
+    const parts = line.trim().split(/\s+/);
+
+    if (parts.length !== 4)
+      continue;
+
+    const seed = parts[0];
+    const x = Number(parts[1]);
+    const z = Number(parts[2]);
+    const score = Number(parts[3]);
+
+    if (
+      !Number.isFinite(x) ||
+      !Number.isFinite(z) ||
+      !Number.isFinite(score)
+    ) {
+      continue;
+    }
+
+    if (inBounds) {
+      if (
+        Math.abs(x) > 30000000 ||
+        Math.abs(z) > 30000000
+      ) {
+        continue;
+      }
+    }
+
+    rows.push([seed, x, z, score]);
+  }
+
+  const unique = {};
+
+  for (const r of rows) {
+    const key = `${r[0]}_${r[1]}_${r[2]}`;
+
+    if (
+      !unique[key] ||
+      r[3] > unique[key][3]
+    ) {
+      unique[key] = r;
+    }
+  }
+
+  let sorted = Object.values(unique);
+
+  if (sortMode === "score") {
+    sorted.sort((a, b) => b[3] - a[3]);
+  }
+
+  else if (sortMode === "distance") {
+    sorted.sort(
+      (a, b) =>
+        dist(a[1], a[2]) -
+        dist(b[1], b[2])
+    );
+  }
+
+  document.getElementById("summary").innerHTML = `
+    <div><b>Results listed:</b> ${fmt(sorted.length)}</div>
+    <div><b>Chart mode:</b>
+      ${lb ? "Large Biomes (3.2M bin)" : "Small Biomes (200k bin)"}
+    </div>
+    <div><b>Sort mode:</b> ${sortMode}</div>
+    <div class="small-muted">
+      Chart counts by X/Z. Distance is only used for sorting.
+    </div>
+  `;
+
+  document.getElementById("seeds").innerHTML =
+    sorted.length
+      ? sorted.map(r => r[0]).join("<br>")
+      : '<span class="small-muted">No results.</span>';
+
+  document.getElementById("sorted").innerHTML =
+    sorted.length
+      ? sorted.map(r => r.join(" ")).join("<br>")
+      : '<span class="small-muted">No results.</span>';
+
+  let out = "";
+
+  for (const r of sorted) {
+
+    const seed = r[0];
+    const x = r[1];
+    const z = r[2];
+    const score = r[3];
+
+    const mcPath = lb ? "/lb" : "";
+    const lValue = lb ? -6 : -4;
+
+    const mcSeedMapUrl =
+      `https://mcseedmap.net/1.21.5-Java${mcPath}/${seed}` +
+      `#x=${x}&z=${z}&l=${lValue}`;
+
+    const cmd =
+      `/shroom worldseed: ${seed} x: ${x} z: ${z} largebiomes: ${lb}`;
+
+    out += `
+      <div class="row">
+        <span>${score}:</span>
+
+        <a
+          class="map-link"
+          href="${mcSeedMapUrl}"
+          target="_blank"
+        >link</a>
+
+        <span>,</span>
+
+        <span
+          class="copy"
+          onclick="copyText(\`${cmd}\`)"
+        >${cmd}</span>
+      </div>
+    `;
+  }
+
+  document.getElementById("links").innerHTML =
+    out ||
+    '<span class="small-muted">No results.</span>';
+
+  renderDistanceChart(sorted);
+  renderChart(sorted, lb);
+}
+
+
+/* ===================================================== */
+/* DISTANCE CHART                                        */
+/* ===================================================== */
+
+function renderDistanceChart(sorted) {
+
+  const container =
+    document.getElementById("distChart");
+
+  if (!sorted.length) {
+    container.innerHTML = `
+      <div class="chart-title">
+        Best score up to distance
+      </div>
+
+      <div class="small-muted">
+        No data for chart.
+      </div>
+    `;
+
+    return;
+  }
+
+  const data =
+    sorted
+      .map(r => ({
+        seed: r[0],
+        x: r[1],
+        z: r[2],
+        score: r[3],
+        distance: dist(r[1], r[2])
+      }))
+      .sort((a, b) =>
+        a.distance - b.distance
+      );
+
+  const maxDistance =
+    Math.max(
+      ...data.map(v => v.distance)
+    );
+
+  const maxScore =
+    Math.max(
+      ...data.map(v => v.score),
+      1
+    );
+
+  let bestSoFar = -Infinity;
+
+  const envelope = [];
+
+  for (const p of data) {
+
+    if (p.score > bestSoFar) {
+      bestSoFar = p.score;
+    }
+
+    envelope.push({
+      distance: p.distance,
+      score: bestSoFar
+    });
+  }
+
+  container.innerHTML = `
+    <div class="chart-title">
+      Best score up to distance
+    </div>
+
+    <div class="chart-note">
+      X-axis: distance from 0,0 ·
+      Y-axis: best score seen up to this distance
+    </div>
+
+    <div class="dist-canvas-wrap">
+      <canvas id="distCanvas"></canvas>
+    </div>
+
+    <div class="small-muted">
+      The line never decreases — it shows the running maximum.
+    </div>
+  `;
+
+  drawDistanceCanvas(
+    envelope,
+    maxDistance,
+    maxScore
+  );
+}
+
+
+function drawDistanceCanvas(
+  points,
+  maxDistance,
+  maxScore
+) {
+  const canvas =
+    document.getElementById("distCanvas");
+
+  if (!canvas)
+    return;
+
+  const cssWidth =
+    canvas.parentElement.clientWidth || 800;
+
+  const cssHeight = 330;
+
+  const dpr =
+    window.devicePixelRatio || 1;
+
+  canvas.width =
+    Math.max(
+      1,
+      Math.floor(cssWidth * dpr)
+    );
+
+  canvas.height =
+    Math.floor(cssHeight * dpr);
+
+  canvas.style.width =
+    cssWidth + "px";
+
+  canvas.style.height =
+    cssHeight + "px";
+
+  const ctx =
+    canvas.getContext("2d");
+
+  if (!ctx)
+    return;
+
+  ctx.setTransform(
+    dpr,
+    0,
+    0,
+    dpr,
+    0,
+    0
+  );
+
+  ctx.clearRect(
+    0,
+    0,
+    cssWidth,
+    cssHeight
+  );
+
+  const padL = 60;
+  const padR = 15;
+  const padT = 15;
+  const padB = 45;
+
+  const plotW =
+    cssWidth - padL - padR;
+
+  const plotH =
+    cssHeight - padT - padB;
+
+  ctx.fillStyle = "#090909";
+  ctx.fillRect(
+    0,
+    0,
+    cssWidth,
+    cssHeight
+  );
+
+  ctx.strokeStyle = "#292929";
+  ctx.lineWidth = 1;
+
+  ctx.beginPath();
+
+  ctx.moveTo(
+    padL,
+    padT
+  );
+
+  ctx.lineTo(
+    padL,
+    padT + plotH
+  );
+
+  ctx.lineTo(
+    padL + plotW,
+    padT + plotH
+  );
+
+  ctx.stroke();
+
+  const maxX =
+    Math.max(maxDistance, 1);
+
+  const maxY =
+    Math.max(maxScore, 1);
+
+  const xToPx =
+    x =>
+      padL +
+      (x / maxX) * plotW;
+
+  const yToPx =
+    y =>
+      padT +
+      plotH -
+      (y / maxY) * plotH;
+
+  ctx.strokeStyle = "#1d1d1d";
+  ctx.fillStyle = "#858585";
+  ctx.font = "11px Arial";
+
+  const xTicks = 6;
+  const yTicks = 5;
+
+  for (let i = 0; i <= xTicks; i++) {
+
+    const xVal =
+      (maxX / xTicks) * i;
+
+    const x =
+      xToPx(xVal);
+
+    ctx.beginPath();
+    ctx.moveTo(x, padT);
+    ctx.lineTo(
+      x,
+      padT + plotH
+    );
+    ctx.stroke();
+
+    ctx.fillText(
+      fmt(Math.round(xVal)),
+      x - 15,
+      padT + plotH + 17
+    );
+  }
+
+  for (let i = 0; i <= yTicks; i++) {
+
+    const yVal =
+      (maxY / yTicks) * i;
+
+    const y =
+      yToPx(yVal);
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      padL,
+      y
+    );
+
+    ctx.lineTo(
+      padL + plotW,
+      y
+    );
+
+    ctx.stroke();
+
+    ctx.fillText(
+      fmt(Math.round(yVal)),
+      5,
+      y + 4
+    );
+  }
+
+  ctx.strokeStyle = "#00ff00";
+  ctx.fillStyle = "#00ff00";
+  ctx.lineWidth = 2;
+
+  ctx.beginPath();
+
+  let currentBest = 0;
+
+  ctx.moveTo(
+    xToPx(0),
+    yToPx(0)
+  );
+
+  for (const p of points) {
+
+    const x =
+      xToPx(p.distance);
+
+    const y =
+      yToPx(p.score);
+
+    ctx.lineTo(
+      x,
+      yToPx(currentBest)
+    );
+
+    if (p.score > currentBest) {
+
+      currentBest = p.score;
+
+      ctx.lineTo(
+        x,
+        yToPx(currentBest)
+      );
+    }
+  }
+
+  ctx.lineTo(
+    xToPx(maxX),
+    yToPx(currentBest)
+  );
+
+  ctx.stroke();
+
+  currentBest = 0;
+
+  for (const p of points) {
+
+    if (p.score > currentBest) {
+
+      currentBest = p.score;
+
+      const x =
+        xToPx(p.distance);
+
+      const y =
+        yToPx(p.score);
+
+      ctx.beginPath();
+
+      ctx.arc(
+        x,
+        y,
+        3,
+        0,
+        Math.PI * 2
+      );
+
+      ctx.fill();
+    }
+  }
+
+  ctx.fillStyle = "#ddd";
+  ctx.font = "bold 12px Arial";
+
+  ctx.fillText(
+    "Distance",
+    padL + plotW / 2 - 25,
+    cssHeight - 8
+  );
+
+  ctx.save();
+
+  ctx.translate(
+    13,
+    padT + plotH / 2 + 45
+  );
+
+  ctx.rotate(-Math.PI / 2);
+
+  ctx.fillText(
+    "Best score",
+    0,
+    0
+  );
+
+  ctx.restore();
+}
+
+
+/* ===================================================== */
+/* HISTOGRAM                                             */
+/* ===================================================== */
+
+function renderChart(sorted, lb) {
+
+  const container =
+    document.getElementById("chart");
+
+  const binSize =
+    lb ? 3200000 : 200000;
+
+  if (!sorted.length) {
+
+    container.innerHTML = `
+      <div class="chart-title">
+        Histogram
+      </div>
+
+      <div class="small-muted">
+        No data for chart.
+      </div>
+    `;
+
+    return;
+  }
+
+  const counts = new Map();
+  const values = [];
+
+  for (const r of sorted) {
+
+    const value = r[3];
+
+    values.push(value);
+
+    const binStart =
+      Math.floor(value / binSize) *
+      binSize;
+
+    counts.set(
+      binStart,
+      (counts.get(binStart) || 0) + 1
+    );
+  }
+
+  const minVal =
+    Math.min(...values);
+
+  const maxVal =
+    Math.max(...values);
+
+  const firstBin =
+    Math.floor(minVal / binSize) *
+    binSize;
+
+  const lastBin =
+    Math.floor(maxVal / binSize) *
+    binSize;
+
+  const entries = [];
+
+  for (
+    let start = firstBin;
+    start <= lastBin;
+    start += binSize
+  ) {
+    entries.push([
+      start,
+      counts.get(start) || 0
+    ]);
+  }
+
+  const maxCount =
+    Math.max(
+      ...entries.map(e => e[1]),
+      1
+    );
+
+  let html = `
+    <div class="chart-title">
+      Histogram
+    </div>
+
+    <div class="chart-note">
+      Bin: ${fmt(binSize)} · Counting by column 3
+    </div>
+  `;
+
+  for (const [start, count] of entries) {
+
+    const end =
+      start + binSize;
+
+    const width =
+      count === 0
+        ? 0
+        : Math.max(
+            1,
+            (count / maxCount) * 100
+          );
+
+    html += `
+      <div class="chart-row">
+
+        <div class="chart-label">
+          ${fmt(start)} - ${fmt(end)}
+        </div>
+
+        <div class="chart-bar-wrap">
+          <div
+            class="chart-bar"
+            style="width:${width}%"
+          ></div>
+        </div>
+
+        <div class="chart-count">
+          ${count}
+        </div>
+
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+}
+
+
+/* ===================================================== */
+/* SEED EXTRACTOR                                        */
+/* ===================================================== */
+
+function extractSeeds() {
+
+  const input =
+    document.getElementById(
+      "extractInput"
+    ).value;
+
+  const lines =
+    input.split(/\r?\n/);
+
+  const out = [];
+
+  for (const line of lines) {
+
+    const m =
+      line.match(
+        /^(-?\d+)\s+at\s+(-?\d+)\s+(-?\d+)\s+with\s+(-?\d+)$/
+      );
+
+    if (m) {
+      out.push(
+        `${m[1]} ${m[2]} ${m[3]} ${m[4]}`
+      );
+    }
+  }
+
+  document.getElementById(
+    "extractOutput"
+  ).value =
+    out.join("\n");
+}
+
+
+function copyExtracted() {
+
+  const output =
+    document.getElementById(
+      "extractOutput"
+    );
+
+  navigator.clipboard.writeText(
+    output.value
+  );
+}
+
+
+/* ===================================================== */
+/* DEDUPER                                               */
+/* ===================================================== */
+
+function dedupeSeeds() {
+
+  const input =
+    document.getElementById(
+      "dedupeInput"
+    ).value;
+
+  const lines =
+    input.split(/\r?\n/);
+
+  const output = [];
+
+  let inputCount = 0;
+  let duplicateCount = 0;
+
+  let i = 0;
+
+  while (i < lines.length) {
+
+    const line =
+      lines[i].trim();
+
+    if (!line) {
+      i++;
+      continue;
+    }
+
+    const p =
+      line.split(/\s+/);
+
+    if (p.length !== 4) {
+      i++;
+      continue;
+    }
+
+    const seed = p[0];
+    const x = Number(p[1]);
+    const z = Number(p[2]);
+    const size = Number(p[3]);
+
+    if (
+      !Number.isFinite(x) ||
+      !Number.isFinite(z) ||
+      !Number.isFinite(size)
+    ) {
+      i++;
+      continue;
+    }
+
+    inputCount++;
+
+    let bestLine = line;
+    let bestSize = size;
+
+    let j = i + 1;
+
+    /*
+     * Duplicates are guaranteed to be adjacent.
+     * Therefore we only scan the current group instead
+     * of building a Map for the entire input.
+     */
+
+    while (j < lines.length) {
+
+      const next =
+        lines[j].trim();
+
+      if (!next)
+        break;
+
+      const np =
+        next.split(/\s+/);
+
+      if (np.length !== 4)
+        break;
+
+      const nextSeed = np[0];
+      const nextX = Number(np[1]);
+      const nextZ = Number(np[2]);
+      const nextSize = Number(np[3]);
+
+      if (
+        nextSeed !== seed ||
+        nextX !== x ||
+        nextZ !== z ||
+        !Number.isFinite(nextSize)
+      ) {
+        break;
+      }
+
+      inputCount++;
+      duplicateCount++;
+
+      if (nextSize > bestSize) {
+        bestSize = nextSize;
+        bestLine = next;
+      }
+
+      j++;
+    }
+
+    output.push(bestLine);
+
+    i = j;
+  }
+
+  document.getElementById(
+    "dedupeOutput"
+  ).value =
+    output.join("\n");
+
+  document.getElementById(
+    "dedupeSummary"
+  ).innerHTML = `
+    <div>
+      <b>Input entries:</b>
+      ${fmt(inputCount)}
+    </div>
+
+    <div>
+      <b>Output entries:</b>
+      ${fmt(output.length)}
+    </div>
+
+    <div>
+      <b>Duplicates removed:</b>
+      ${fmt(duplicateCount)}
+    </div>
+
+    <div class="small-muted">
+      Entries with the same seed, X and Z are treated as duplicates.
+      The largest size is kept.
+    </div>
+  `;
+}
+
+
+function copyDedupe() {
+
+  const output =
+    document.getElementById(
+      "dedupeOutput"
+    );
+
+  navigator.clipboard.writeText(
+    output.value
+  );
+}
+
+
+/* ===================================================== */
+/* MAP                                                   */
+/* ===================================================== */
+
+function parseMapData(text) {
+
+  const points = [];
+
+  for (const line of text.split(/\r?\n/)) {
+
+    const l = line.trim();
+
+    if (!l)
+      continue;
+
+    const p =
+      l.split(/\s+/);
+
+    if (p.length < 4)
+      continue;
+
+    const seed = p[0];
+    const x = Number(p[1]);
+    const z = Number(p[2]);
+    const size = Number(p[3]);
+
+    if (
+      !Number.isFinite(x) ||
+      !Number.isFinite(z) ||
+      !Number.isFinite(size)
+    ) {
+      continue;
+    }
+
+    points.push({
+      seed,
+      x,
+      z,
+      size
+    });
+  }
+
+  return points;
+}
+
+
+function drawMap() {
+
+  const text =
+    document.getElementById(
+      "mapInput"
+    ).value;
+
+  const points =
+    parseMapData(text);
+
+  const largeBiomes =
+    document.getElementById(
+      "mapLargeBiomes"
+    ).checked;
+
+  /*
+   * The map always represents the same fixed
+   * coordinate range.
+   */
+
+  const mapSize =
+    largeBiomes
+      ? 694157312
+      : 173539328;
+
+  const grid =
+    document.getElementById(
+      "mapGrid"
+    );
+
+  grid.innerHTML = "";
+
+  document.getElementById(
+    "mapSizeInfo"
+  ).textContent =
+    `Map: ${fmt(mapSize)} × ${fmt(mapSize)}`;
+
+  document.getElementById(
+    "mapPointInfo"
+  ).textContent =
+    `${fmt(points.length)} points`;
+
+  if (!points.length)
+    return;
+
+  let minSize = Infinity;
+  let maxSize = -Infinity;
+
+  for (const p of points) {
+
+    minSize =
+      Math.min(minSize, p.size);
+
+    maxSize =
+      Math.max(maxSize, p.size);
+  }
+
+  function color(size) {
+
+    if (maxSize === minSize)
+      return "#00ff00";
+
+    const t =
+      (
+        Math.log(size) -
+        Math.log(minSize)
+      ) /
+      (
+        Math.log(maxSize) -
+        Math.log(minSize)
+      );
+
+    /*
+     * Mostly green with a small brightness variation.
+     * This keeps the map in the same visual language
+     * as the rest of the site.
+     */
+
+    const brightness =
+      Math.round(
+        110 + 120 * t
+      );
+
+    return `rgb(0, ${brightness}, 0)`;
+  }
+
+  /*
+   * Coordinate system:
+   *
+   * -mapSize/2 ... 0 ... +mapSize/2
+   *
+   * This keeps 0,0 exactly in the centre.
+   */
+
+  for (const p of points) {
+
+    const nx =
+      (p.x + mapSize / 2) /
+      mapSize;
+
+    const nz =
+      (p.z + mapSize / 2) /
+      mapSize;
+
+    /*
+     * Do not draw points outside the map.
+     */
+
+    if (
+      nx < 0 ||
+      nx > 1 ||
+      nz < 0 ||
+      nz > 1
+    ) {
+      continue;
+    }
+
+    const div =
+      document.createElement("div");
+
+    div.className = "point";
+
+    div.style.left =
+      `${nx * 100}%`;
+
+    div.style.top =
+      `${nz * 100}%`;
+
+    div.style.backgroundColor =
+      color(p.size);
+
+    div.title =
+      `seed: ${p.seed}\n` +
+      `x: ${p.x}\n` +
+      `z: ${p.z}\n` +
+      `size: ${p.size}`;
+
+    grid.appendChild(div);
+  }
+}
+
+
+/* ===================================================== */
+/* RESIZE                                                */
+/* ===================================================== */
+
+window.addEventListener(
+  "resize",
+  () => {
+
+    const input =
+      document.getElementById(
+        "processorInput"
+      ).value.trim();
+
+    if (input) {
+      try {
+        processSeeds();
+      }
+      catch (_) {}
+    }
+  }
+);
+
+</script>
+
+</body>
+</html>
