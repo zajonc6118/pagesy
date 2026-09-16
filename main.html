@@ -14,11 +14,14 @@
       --muted: #858585;
       --accent: #00ff00;
       --border: #292929;
-      --input: #0d0d0d;
     }
 
     * {
       box-sizing: border-box;
+    }
+
+    html {
+      min-width: 320px;
     }
 
     body {
@@ -35,15 +38,16 @@
     }
 
     .page {
-      width: min(1280px, calc(100% - 40px));
+      width: min(1180px, calc(100% - 40px));
       margin: 0 auto;
-      padding: 34px 0;
+      padding: 34px 0 28px;
     }
 
-    header {
-      width: min(620px, 100%);
+    /* Header */
+
+    .site-header {
       border: 2px solid var(--border);
-      border-left: 2px solid var(--accent);
+      border-left-color: var(--accent);
       background: var(--panel);
       padding: 18px 20px;
       margin-bottom: 18px;
@@ -59,64 +63,64 @@
     h1 {
       margin: 0;
       font-size: 28px;
+      line-height: 1;
       letter-spacing: -1px;
     }
 
     .dot {
       width: 8px;
       height: 8px;
-      background: var(--accent);
-      box-shadow: 0 0 8px rgba(0, 255, 0, .5);
       flex: 0 0 auto;
+      background: var(--accent);
+      box-shadow: 0 0 8px rgba(0, 255, 0, .45);
     }
 
     .intro {
-      margin: 8px 0 0;
+      margin: 9px 0 0;
       color: var(--muted);
       font-size: 14px;
+      line-height: 1.45;
     }
 
-    details {
-      width: fit-content;
-      max-width: 100%;
+    /* Section */
+
+    .section {
       border: 2px solid var(--border);
       background: var(--panel);
     }
 
-    summary {
-      cursor: pointer;
+    .section-title {
       padding: 11px 14px;
+      border-bottom: 2px solid var(--border);
       font-size: 14px;
       font-weight: bold;
-      user-select: none;
-      list-style-position: inside;
     }
 
-    summary::marker {
-      color: var(--accent);
-    }
-
-    details[open] summary {
-      border-bottom: 2px solid var(--border);
-    }
+    /* Cards */
 
     .links {
       display: grid;
-      grid-template-columns: repeat(3, minmax(180px, 220px));
-      gap: 9px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
       padding: 10px;
     }
 
     .card {
+      min-width: 0;
       min-height: 122px;
+
       border: 2px solid var(--border);
       background: #0e0e0e;
       padding: 13px;
-      transition: .15s ease;
+
+      transition:
+        border-color .15s ease,
+        background .15s ease,
+        transform .15s ease;
     }
 
     .card:hover {
-      border-color: var(--accent);
+      border-color: #3d3d3d;
       background: var(--panel-hover);
       transform: translateY(-1px);
     }
@@ -124,6 +128,7 @@
     .card h2 {
       margin: 0 0 5px;
       font-size: 16px;
+      line-height: 1.25;
     }
 
     .card p {
@@ -140,30 +145,31 @@
       font-size: 12px;
     }
 
+    /* Footer */
+
     footer {
       margin-top: 12px;
+      padding: 0 2px;
       color: #505050;
       font-size: 11px;
     }
 
+    /* Responsive */
+
     @media (max-width: 900px) {
       .links {
-        grid-template-columns: repeat(2, minmax(180px, 220px));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 560px) {
       .page {
-        width: calc(100% - 20px);
+        width: min(100% - 20px, 1180px);
         padding-top: 20px;
       }
 
       .links {
         grid-template-columns: 1fr;
-      }
-
-      .card {
-        min-height: 105px;
       }
     }
   </style>
@@ -172,7 +178,7 @@
 <body>
   <main class="page">
 
-    <header>
+    <header class="site-header">
       <div class="top">
         <h1>ZAJONC6118</h1>
         <div class="dot"></div>
@@ -183,8 +189,8 @@
       </p>
     </header>
 
-    <details open>
-      <summary>Pages</summary>
+    <section class="section">
+      <div class="section-title">Pages</div>
 
       <div class="links">
 
@@ -225,9 +231,11 @@
         </a>
 
       </div>
-    </details>
+    </section>
 
-    <footer>github.io</footer>
+    <footer>
+      github.io
+    </footer>
 
   </main>
 </body>
